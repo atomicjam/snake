@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <canvas id="gameCanvas" width="800" height="800"></canvas>
+        <script>
+        window.onload=function() {
+            //get game canvas
+            canvas = document.getElementById("gameCanvas");
+            //set context to 2d
+            gameShell = canvas.getContext("2d");
+            //setup event listeners for when key pressed
+            document.addEventListener("keydown",keyPush);
+            //set game refresh interval 
+            setInterval(game,1000/15);
+        }
+        //setup game variables
+        cubeSize = 20;
+        tileCount = 40;
+        trail = [];
+        tail = 5;
+        score = 0;
+        //snake tile velocity
+        velocityX = 0;
+        velocityY = 0;
+        //snake starting cords
+        snakeheadX = 10;
+        snakeheadY = 10;
+        //apple starting cords
+        appleX = 5;
+        appleY = 5;
+        //game core function
+        function game() {
+            //move snakehead depending on velocity
+            snakeheadX += velocityX;
+            snakeheadY += velocityY;
+            //check head isnt outside area boundries
+            if(snakeheadX < 0) {
+                snakeheadX = tileCount-1;
+            }
+            if(snakeheadX > tileCount-1) {
+                snakeheadX = 0;
+            }
+            if(snakeheadY < 0) {
+                snakeheadY = tileCount-1;
+            }
+            if(snakeheadY > tileCount-1) {
+                snakeheadY = 0;
+            }
+            //render frame 
+            gameShell.fillStyle = "#fff";
+            gameShell.rect(0,0,canvas.width,canvas.height);
+            gameShell.fill();
+            //create snake in frame
+            gameShell.fillStyle = "#677b6e";
+            //for each of the trail segments
+            for(var i=0;i<trail.length;i++) {
+                //draw snake segment
+                gameShell.fillRect(trail[i].x*cubeSize,trail[i].y*cubeSize,cubeSize,cubeSize);
+                //if crash into own tail reset tail to 5 length and reset score
+                if(trail[i].x==snakeheadX && trail[i].y==snakeheadY) {
+                    tail = 5;
+                    score = 0;
+                }
+            }
+            //move snake
+            //draw new head
+            trail.push({x:snakeheadX,y:snakeheadY});
+            //shift segments off end to make trail correct lail length 
+            while(trail.length>tail) {
+                trail.shift();
+            }
+            //snake eats red apple
+            if(appleX==snakeheadX && appleY==snakeheadY) {
+                //grow tail
+                tail++;
+                //update score
+                score++;
+                //randomise new apple 
+                appleX=Math.floor(Math.random()*tileCount);
+                appleY=Math.floor(Math.random()*tileCount);
+            }
+            //create apple cube 
+            gameShell.fillStyle = "red";
+            gameShell.fillRect(appleX*cubeSize,appleY*cubeSize,cubeSize,cubeSize);
+            //render scoreboard
+            gameShell.fillStyle = "black";
+            gameShell.font = "15px Arial";
+            gameShell.fillText('Score: ' + score,700,30);
+        }
+        //game key controls 
+        function keyPush(evt) {
+            switch(evt.keyCode) {
+                //key up
+                case 37:
+                    velocityX = -1;
+                    velocityY = 0;
+                    break;
+                //key right
+                case 38:
+                    velocityX = 0;
+                    velocityY = -1;
+                    break;
+                //key down
+                case 39:
+                    velocityX = 1;
+                    velocityY = 0;
+                    break;
+                //key left
+                case 40:
+                    velocityX = 0;
+                    velocityY = 1;
+                    break;
+            }
+        }
+        </script>
+    </body>
+</html>
